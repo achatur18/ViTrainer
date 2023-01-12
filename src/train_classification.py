@@ -29,19 +29,22 @@ def train_vgg16(
     test_loader,
     device,
     data_size,
+    config,
     num_epochs=3,
     learning_rate=0.1,
-    decay_learning_rate=False,
+    decay_learning_rate=False
 ):
     # Some models behave differently in training and testing mode (Dropout, BatchNorm)
     # so it is good practice to specify which behavior you want.
     model.train()
 
     # We will use the Adam with Cross Entropy loss
-    optimizer = torch.optim.Adam(model.fc.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(
+        model.fc.parameters(),
+        lr=config["model"]["learning_rate"])
     criterion = torch.nn.CrossEntropyLoss()
 
-    if decay_learning_rate:
+    if config["model"]["decay_learning_rate"]:
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1, 0.85)
 
     # We make multiple passes over the dataset
@@ -146,7 +149,8 @@ def train(config_path):
         test_loader,
         device,
         num_epochs=config["training"]["epochs"],
-        data_size=len(train_loader))
+        data_size=len(train_loader),
+        config=config)
     torch.save(
         model,
         os.path.join(

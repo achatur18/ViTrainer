@@ -12,6 +12,7 @@ model:
     learning_rate: 0.001
     loss_function: "categorical_crossentropy"
     metrics: ["accuracy"]
+    decay_learning_rate: False
 
 # Training parameters
 training:
