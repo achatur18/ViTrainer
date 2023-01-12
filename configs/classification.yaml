@@ -2,12 +2,11 @@
 
 # Dataset path
 dataset:
-    train_path: "path/to/train/data"
-    test_path: "path/to/test/data"
+    train_path: "/Users/abhaychaturvedi/Documents/Work/accelerators/classification_data"
+    test_path: "/Users/abhaychaturvedi/Documents/Work/accelerators/classification_data"
 
 # Model parameters
 model:
-    output_neurons: 2
     architecture: "vgg16"
     optimizer: "Adam"
     learning_rate: 0.001
@@ -16,7 +15,13 @@ model:
 
 # Training parameters
 training:
-    epochs: 10
+    epochs: 2
     batch_size: 32
-    validation_split: 0.2
 
+# Training parameters
+testing:
+    batch_size: 32
+
+output:
+    directory: "/Users/abhaychaturvedi/Documents/Work/ViTrain/outputs"
+    weights_name: "classification_model.pth"
