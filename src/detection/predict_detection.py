@@ -98,7 +98,8 @@ def predict_detection(config_path, image_path):
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     predictor = DefaultPredictor(cfg)
 
-    return predict(image_path, predictor, metadata_)
+    image_pred = predict(image_path, predictor, metadata_)
+    cv2.imwrite("output/output_pred.jpg", image_pred)
 
 
 print(
