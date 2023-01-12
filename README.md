@@ -1,0 +1,5 @@
+# ViTrainer
+
+## Installation
+
+pip install .
