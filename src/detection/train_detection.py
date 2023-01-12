@@ -49,7 +49,7 @@ def train_detection(config_path):
     config = get_config(config_path)
     cfg = get_cfg()
     cfg.merge_from_file(
-        os.path.join(os.getcwd(), "configs/COCO-Detection/mask_rcnn_R_50_C4_3x.yaml"))
+        os.path.join(os.getcwd(), "configs/mask_rcnn_R_50_C4_3x.yaml"))
 
     train_data_name = "{}_train".format(config["DATASET"]["name"])
 
