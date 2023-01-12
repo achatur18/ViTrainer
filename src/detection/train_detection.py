@@ -1,24 +1,24 @@
-from detectron2.utils.visualizer import Visualizer
-from detectron2.engine import DefaultPredictor, DefaultTrainer
-from detectron2.data.datasets import register_coco_instances
-from detectron2.data import DatasetCatalog, MetadataCatalog
-from detectron2.config import get_cfg
-from detectron2 import model_zoo
-import yaml
-import numpy as np
-import cv2
-import random
-import json
 import argparse
 import distutils.core
+import json
 import os
+import random
 import sys
 
+import cv2
 # Some basic setup:
 # Setup detectron2 logger
 import detectron2
+import numpy as np
 import torch
+import yaml
+from detectron2 import model_zoo
+from detectron2.config import get_cfg
+from detectron2.data import DatasetCatalog, MetadataCatalog
+from detectron2.data.datasets import register_coco_instances
+from detectron2.engine import DefaultPredictor, DefaultTrainer
 from detectron2.utils.logger import setup_logger
+from detectron2.utils.visualizer import Visualizer
 
 setup_logger()
 
@@ -46,10 +46,10 @@ args = parser.parse_args()
 
 
 def train_detection(config_path):
+    config = get_config(config_path)
     cfg = get_cfg()
     cfg.merge_from_file(
-        "/Users/abhaychaturvedi/Documents/Work/ViTrainer/src/detectron2/configs/COCO-Detection/faster_rcnn_R_50_C4_3x.yaml")
-    config = get_config(config_path)
+        "../../configs/COCO-Detection/faster_rcnn_R_50_C4_3x.yaml")
 
     train_data_name = "{}_train".format(config["DATASET"]["name"])
 
