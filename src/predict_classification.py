@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import colorama
@@ -46,8 +47,18 @@ def predict(config_path, image_path):
     return pred
 
 
-image_path = "/Users/abhaychaturvedi/Documents/Work/accelerators/classification_data/passport/14_1.png"
+# image_path = "/Users/abhaychaturvedi/Documents/Work/accelerators/classification_data/passport/14_1.png"
+
+
+# Define the command-line flag
+parser = argparse.ArgumentParser()
+parser.add_argument("--file", type=str, help="path to the config file")
+parser.add_argument("--image_path", type=str, help="path to the image file")
+
+# Parse the command-line arguments
+args = parser.parse_args()
+
 print(
     predict(
-        "/Users/abhaychaturvedi/Documents/Work/ViTrain/configs/classification.yaml",
-        image_path))
+        args.file,
+        args.image_path))

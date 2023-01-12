@@ -23,5 +23,5 @@ testing:
     batch_size: 32
 
 output:
-    directory: "/Users/abhaychaturvedi/Documents/Work/ViTrain/outputs"
+    directory: "outputs"
     weights_name: "classification_model.pth"

@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import colorama
@@ -153,4 +154,13 @@ def train(config_path):
             config["output"]["weights_name"]))
 
 
-train("/Users/abhaychaturvedi/Documents/Work/ViTrain/configs/classification.yaml")
+# Define the command-line flag
+parser = argparse.ArgumentParser()
+parser.add_argument("--file", type=str, help="path to the input file")
+
+# Parse the command-line arguments
+args = parser.parse_args()
+
+
+train(config_path=str(args.file))
+# train("/Users/abhaychaturvedi/Documents/Work/ViTrain/configs/classification.yaml")
