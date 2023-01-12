@@ -1,0 +1,19 @@
+EPOCH: 5
+BASE_LR: 0.00025
+RESUME: True
+OUTPUT:
+  OUTPUT_DIR: "outputs"
+  MODEL_NAME: "model_final_obj_det.pth"
+DATASET:
+  name: "id-dataset"
+  annotations_path: "/Users/abhaychaturvedi/Documents/Work/accelerators/id-data-coco/annotations/instances_default.json"
+  images_path: "/Users/abhaychaturvedi/Documents/Work/accelerators/id-data-coco/images"
+MODEL:
+  DEVICE: "cpu"
+  MASK_ON: False
+  ROI_HEADS:
+    BATCH_SIZE_PER_IMAGE: 8
+DATALOADER:
+  NUM_WORKERS: 0
+SOLVER:
+  IMS_PER_BATCH: 2
