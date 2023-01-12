@@ -11,6 +11,7 @@ setup(
     description='A single library for training your computer vision models.',
     install_requires=[
         'numpy',
-        "torch"
+        "torch",
+        "colorama"
     ],
 )
