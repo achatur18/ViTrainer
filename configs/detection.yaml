@@ -3,7 +3,7 @@ BASE_LR: 0.00025
 RESUME: True
 OUTPUT:
   OUTPUT_DIR: "outputs"
-  MODEL_NAME: "model_final_obj_det.pth"
+  MODEL_NAME: "model_final.pth"
 DATASET:
   name: "id-dataset"
   annotations_path: "/Users/abhaychaturvedi/Documents/Work/accelerators/id-data-coco/annotations/instances_default.json"
