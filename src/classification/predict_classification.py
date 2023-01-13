@@ -1,6 +1,7 @@
 import argparse
 import os
 
+import cv2
 import colorama
 import matplotlib
 import matplotlib.pyplot as plt
@@ -35,16 +36,17 @@ def predict(config_path, image_path):
             config["output"]["weights_name"]))
     model.eval()
     # Open the image
-    img = Image.open(image_path).convert('RGB')
+    image=cv2.imread(image_path)
+    image = Image.fromarray(image).convert('RGB')
 
-    batch = transform(img).unsqueeze(0)
+    batch = transform(image).unsqueeze(0)
 
     with torch.no_grad():
         output = model(batch)
 
     # Get the class with the highest probability
-    _, pred = output.max(1)
-    return pred
+    _, pred = torch.max(output, 1)
+    return float(pred[0])
 
 
 # image_path = "/Users/abhaychaturvedi/Documents/Work/accelerators/classification_data/passport/14_1.png"
