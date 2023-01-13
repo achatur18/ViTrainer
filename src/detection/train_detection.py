@@ -22,9 +22,6 @@ from detectron2.utils.visualizer import Visualizer
 
 setup_logger()
 
-# import some common libraries
-# import some common detectron2 utilities
-
 TORCH_VERSION = ".".join(torch.__version__.split(".")[:2])
 CUDA_VERSION = torch.__version__.split("+")[-1]
 print("torch: ", TORCH_VERSION, "; cuda: ", CUDA_VERSION)
@@ -37,16 +34,16 @@ def get_config(config_path):
     return config
 
 
-# # Define the command-line flag
-# parser = argparse.ArgumentParser()
-# parser.add_argument("--file", type=str, help="path to the input file")
+# Define the command-line flag
+parser = argparse.ArgumentParser()
+parser.add_argument("--file", type=str, help="path to the input file")
 
-# # Parse the command-line arguments
-# args = parser.parse_args()
+# Parse the command-line arguments
+args = parser.parse_args()
 
 
-def train_detection(config):
-    # config = get_config(config_path)
+def train_detection(config_path):
+    config = get_config(config_path)
     cfg = get_cfg()
     cfg.merge_from_file(
         os.path.join(os.getcwd(), "configs/mask_rcnn_R_50_C4_3x.yaml"))
@@ -83,4 +80,4 @@ def train_detection(config):
     trainer.train()
 
 
-# train_detection(config_path=str(args.file))
+train_detection(str(args.file))
