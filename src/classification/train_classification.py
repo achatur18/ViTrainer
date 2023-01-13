@@ -137,6 +137,8 @@ def train_classification(config_path):
         shuffle=False)
 
     model = torchvision.models.resnet18(pretrained=True)
+    for param in model.parameters():
+      param.requires_grad = False
     model.fc = nn.Linear(
         in_features=512, out_features=len(class_names)
     )
