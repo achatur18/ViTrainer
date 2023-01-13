@@ -22,9 +22,6 @@ from detectron2.utils.visualizer import ColorMode, Visualizer
 
 setup_logger()
 
-# import some common libraries
-# import some common detectron2 utilities
-
 TORCH_VERSION = ".".join(torch.__version__.split(".")[:2])
 CUDA_VERSION = torch.__version__.split("+")[-1]
 print("torch: ", TORCH_VERSION, "; cuda: ", CUDA_VERSION)
@@ -37,17 +34,17 @@ def get_config(config_path):
     return config
 
 
-# # Define the command-line flag
-# parser = argparse.ArgumentParser()
-# parser.add_argument("--file", type=str, help="path to the input file")
-# parser.add_argument("--image_path", type=str, help="path to the image file")
+# Define the command-line flag
+parser = argparse.ArgumentParser()
+parser.add_argument("--file", type=str, help="path to the input file")
+parser.add_argument("--image_path", type=str, help="path to the image file")
 
-# # Parse the command-line arguments
-# args = parser.parse_args()
+# Parse the command-line arguments
+args = parser.parse_args()
 
 
-def predict(im, predictor, metadata_):
-    # im = cv2.imread(image_path)
+def predict(image_path, predictor, metadata_):
+    im = cv2.imread(image_path)
     # format is documented at
     # https://detectron2.readthedocs.io/tutorials/models.html#model-output-format
     outputs = predictor(im)
@@ -78,8 +75,8 @@ def predict(im, predictor, metadata_):
     return {"boxes": boxes, "classes": classes, "scores": scores}
 
 
-def predict_detection(config, image):
-    # config = get_config(config_path)
+def predict_detection(config_path, image_path):
+    config = get_config(config_path)
     cfg = get_cfg()
     cfg.merge_from_file(
         os.path.join(os.getcwd(), "configs/mask_rcnn_R_50_C4_3x.yaml"))
@@ -102,13 +99,18 @@ def predict_detection(config, image):
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     predictor = DefaultPredictor(cfg)
 
-    image_pred = predict(image, predictor, metadata_)
+    image_pred = predict(image_path, predictor, metadata_)
+
+    # Convert the dictionary to a JSON string
+    json_data = json.dumps(image_pred)
+
+    # Save the JSON string to a file
+    with open('output/result.json', 'w') as outfile:
+        outfile.write(json_data)
     return image_pred
     # cv2.imwrite("output/output_pred.jpg", image_pred)
 
 
-# print(
-#     predict_detection(
-#         config_path=str(
-#             args.file),
-#         image_path=args.image_path))
+print(
+    predict_detection(str(args.file),
+        image_path=args.image_path))

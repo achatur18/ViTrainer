@@ -35,11 +35,13 @@ def predict(config_path, image_path):
             config["output"]["directory"],
             config["output"]["weights_name"]))
     model.eval()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
     # Open the image
     image=cv2.imread(image_path)
     image = Image.fromarray(image).convert('RGB')
 
-    batch = transform(image).unsqueeze(0)
+    batch = transform(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
         output = model(batch)

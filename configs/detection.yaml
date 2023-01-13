@@ -7,8 +7,8 @@ OUTPUT:
 DATASET:
   num_classes: 4
   name: "id-dataset"
-  annotations_path: "/Users/abhaychaturvedi/Documents/Work/accelerators/id-data-coco/annotations/instances_default.json"
-  images_path: "/Users/abhaychaturvedi/Documents/Work/accelerators/id-data-coco/images"
+  annotations_path: "/Users/abhaychaturvedi/Documents/Work/ViTrainer/data/id-data/annotations/instances_default.json"
+  images_path: "/Users/abhaychaturvedi/Documents/Work/ViTrainer/data/id-data/images"
 MODEL:    
   DEVICE: "cpu"
   MASK_ON: True
