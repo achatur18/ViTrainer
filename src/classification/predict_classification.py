@@ -1,6 +1,7 @@
 import argparse
 import os
 
+import cv2
 import colorama
 import matplotlib
 import matplotlib.pyplot as plt
@@ -27,14 +28,15 @@ def get_config(config_path):
     return config
 
 
-def predict(config, image):
-    # config = get_config(config_path)
+def predict(config_path, image_path):
+    config = get_config(config_path)
     model = torch.load(
         os.path.join(
             config["output"]["directory"],
             config["output"]["weights_name"]))
     model.eval()
     # Open the image
+    image=cv2.imread(image_path)
     image = Image.fromarray(image).convert('RGB')
 
     batch = transform(image).unsqueeze(0)
@@ -43,22 +45,22 @@ def predict(config, image):
         output = model(batch)
 
     # Get the class with the highest probability
-    _, pred = output.max(1)
+    _, pred = torch.max(output, 1)
     return float(pred[0])
 
 
 # image_path = "/Users/abhaychaturvedi/Documents/Work/accelerators/classification_data/passport/14_1.png"
 
 
-# # Define the command-line flag
-# parser = argparse.ArgumentParser()
-# parser.add_argument("--file", type=str, help="path to the config file")
-# parser.add_argument("--image_path", type=str, help="path to the image file")
+# Define the command-line flag
+parser = argparse.ArgumentParser()
+parser.add_argument("--file", type=str, help="path to the config file")
+parser.add_argument("--image_path", type=str, help="path to the image file")
 
-# # Parse the command-line arguments
-# args = parser.parse_args()
+# Parse the command-line arguments
+args = parser.parse_args()
 
-# print(
-#     predict(
-#         args.file,
-#         args.image_path))
+print(
+    predict(
+        args.file,
+        args.image_path))

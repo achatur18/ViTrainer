@@ -2,8 +2,8 @@
 
 # Dataset path
 dataset:
-    train_path: "/Users/abhaychaturvedi/Documents/Work/accelerators/classification_data"
-    test_path: "/Users/abhaychaturvedi/Documents/Work/accelerators/classification_data"
+    train_path: "/Users/abhaychaturvedi/Documents/Work/ViTrainer/data/catdog/training_set/training_set"
+    test_path: "/Users/abhaychaturvedi/Documents/Work/ViTrainer/data/catdog/test_set/test_set"
 
 # Model parameters
 model:
@@ -16,7 +16,7 @@ model:
 
 # Training parameters
 training:
-    epochs: 2
+    epochs: 10
     batch_size: 32
 
 # Training parameters
@@ -24,5 +24,5 @@ testing:
     batch_size: 32
 
 output:
-    directory: "outputs"
+    directory: "output"
     weights_name: "classification_model.pth"

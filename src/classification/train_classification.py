@@ -105,8 +105,8 @@ def accuracy(model, data_loader, device):
     return num_correct / num_samples
 
 
-def train_classification(config):
-    # config = get_config(config_path)
+def train_classification(config_path):
+    config = get_config(config_path)
 
     # Create datasets
     train_data = ImageFolder(
@@ -162,13 +162,12 @@ def train_classification(config):
             config["output"]["weights_name"]))
 
 
-# # Define the command-line flag
-# parser = argparse.ArgumentParser()
-# parser.add_argument("--file", type=str, help="path to the input file")
+# Define the command-line flag
+parser = argparse.ArgumentParser()
+parser.add_argument("--file", type=str, help="path to the input file")
 
-# # Parse the command-line arguments
-# args = parser.parse_args()
+# Parse the command-line arguments
+args = parser.parse_args()
 
 
-# train_classification(config_path=str(args.file))
-# train("/Users/abhaychaturvedi/Documents/Work/ViTrain/configs/classification.yaml")
+train_classification(str(args.file))
