@@ -37,73 +37,78 @@ def get_config(config_path):
     return config
 
 
-# Define the command-line flag
-parser = argparse.ArgumentParser()
-parser.add_argument("--file", type=str, help="path to the input file")
-parser.add_argument("--image_path", type=str, help="path to the image file")
+# # Define the command-line flag
+# parser = argparse.ArgumentParser()
+# parser.add_argument("--file", type=str, help="path to the input file")
+# parser.add_argument("--image_path", type=str, help="path to the image file")
 
-# Parse the command-line arguments
-args = parser.parse_args()
+# # Parse the command-line arguments
+# args = parser.parse_args()
 
 
-def predict(image_path, predictor, metadata):
-    im = cv2.imread(image_path)
+def predict(im, predictor, metadata_):
+    # im = cv2.imread(image_path)
     # format is documented at
     # https://detectron2.readthedocs.io/tutorials/models.html#model-output-format
     outputs = predictor(im)
+    # print(outputs)
+
+    scores = []
+    for score in outputs["instances"].scores:
+        scores.append(float(score))
+
+    boxes = []
+    for box in outputs["instances"].pred_boxes:
+        boxes.append([int(x) for x in box])
+
+    classes = []
+    for class_ in outputs["instances"].pred_classes:
+        classes.append(int(class_))
+
     v = Visualizer(im[:, :, ::-1],
-                   metadata=metadata,
+                   metadata=metadata_,
                    scale=0.5,
                    # remove the colors of unsegmented pixels. This option is
                    # only available for segmentation models
                    instance_mode=ColorMode.IMAGE_BW
                    )
     out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-    return out.get_image()[:, :, ::-1]
+    out = out.get_image()[:, :, ::-1]
+    cv2.imwrite("output/result.jpg", out)
+    return {"boxes": boxes, "classes": classes, "scores": scores}
 
 
-def predict_detection(config_path, image_path):
-    config = get_config(config_path)
+def predict_detection(config, image):
+    # config = get_config(config_path)
     cfg = get_cfg()
     cfg.merge_from_file(
         os.path.join(os.getcwd(), "configs/mask_rcnn_R_50_C4_3x.yaml"))
 
-    train_data_name = "{}_train".format(config["DATASET"]["name"])
-
-    register_coco_instances(
-        train_data_name,
-        {},
-        config["DATASET"]["annotations_path"],
-        config["DATASET"]["images_path"])
-    dataset_dicts = DatasetCatalog.get(
-        "{}_train".format(config["DATASET"]["name"]))
     metadata_ = MetadataCatalog.get(
         "{}_train".format(
             config["DATASET"]["name"]))
-
     # The "RoIHead batch size". 128 is faster, and good enough for this toy
     # dataset (default: 512)
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = config["MODEL"]["ROI_HEADS"]["BATCH_SIZE_PER_IMAGE"]
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(metadata_.thing_classes)
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = config["DATASET"]["num_classes"]
     cfg.DATALOADER.NUM_WORKERS = config["DATALOADER"]["NUM_WORKERS"]
     cfg.SOLVER.IMS_PER_BATCH = config["SOLVER"]["IMS_PER_BATCH"]
-
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = config["MODEL"]["ROI_HEADS"]["SCORE_THRESH_TEST"]
     cfg.OUTPUT_DIR = config["OUTPUT"]["OUTPUT_DIR"]
     cfg.MODEL.MASK_ON = config["MODEL"]["MASK_ON"]
-    cfg.DATASETS.TRAIN = (train_data_name,)
-    cfg.DATASETS.TEST = ()
     cfg.MODEL.DEVICE = config["MODEL"]["DEVICE"]
     cfg.SOLVER.BASE_LR = config["BASE_LR"]
     cfg.SOLVER.MAX_ITER = config["EPOCH"]
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     predictor = DefaultPredictor(cfg)
 
-    image_pred = predict(image_path, predictor, metadata_)
-    cv2.imwrite("output/output_pred.jpg", image_pred)
+    image_pred = predict(image, predictor, metadata_)
+    return image_pred
+    # cv2.imwrite("output/output_pred.jpg", image_pred)
 
 
-print(
-    predict_detection(
-        config_path=str(
-            args.file),
-        image_path=args.image_path))
+# print(
+#     predict_detection(
+#         config_path=str(
+#             args.file),
+#         image_path=args.image_path))

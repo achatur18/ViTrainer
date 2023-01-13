@@ -27,38 +27,38 @@ def get_config(config_path):
     return config
 
 
-def predict(config_path, image_path):
-    config = get_config(config_path)
+def predict(config, image):
+    # config = get_config(config_path)
     model = torch.load(
         os.path.join(
             config["output"]["directory"],
             config["output"]["weights_name"]))
     model.eval()
     # Open the image
-    img = Image.open(image_path).convert('RGB')
+    image = Image.fromarray(image).convert('RGB')
 
-    batch = transform(img).unsqueeze(0)
+    batch = transform(image).unsqueeze(0)
 
     with torch.no_grad():
         output = model(batch)
 
     # Get the class with the highest probability
     _, pred = output.max(1)
-    return pred
+    return float(pred[0])
 
 
 # image_path = "/Users/abhaychaturvedi/Documents/Work/accelerators/classification_data/passport/14_1.png"
 
 
-# Define the command-line flag
-parser = argparse.ArgumentParser()
-parser.add_argument("--file", type=str, help="path to the config file")
-parser.add_argument("--image_path", type=str, help="path to the image file")
+# # Define the command-line flag
+# parser = argparse.ArgumentParser()
+# parser.add_argument("--file", type=str, help="path to the config file")
+# parser.add_argument("--image_path", type=str, help="path to the image file")
 
-# Parse the command-line arguments
-args = parser.parse_args()
+# # Parse the command-line arguments
+# args = parser.parse_args()
 
-print(
-    predict(
-        args.file,
-        args.image_path))
+# print(
+#     predict(
+#         args.file,
+#         args.image_path))

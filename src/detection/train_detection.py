@@ -37,27 +37,28 @@ def get_config(config_path):
     return config
 
 
-# Define the command-line flag
-parser = argparse.ArgumentParser()
-parser.add_argument("--file", type=str, help="path to the input file")
+# # Define the command-line flag
+# parser = argparse.ArgumentParser()
+# parser.add_argument("--file", type=str, help="path to the input file")
 
-# Parse the command-line arguments
-args = parser.parse_args()
+# # Parse the command-line arguments
+# args = parser.parse_args()
 
 
-def train_detection(config_path):
-    config = get_config(config_path)
+def train_detection(config):
+    # config = get_config(config_path)
     cfg = get_cfg()
     cfg.merge_from_file(
         os.path.join(os.getcwd(), "configs/mask_rcnn_R_50_C4_3x.yaml"))
 
     train_data_name = "{}_train".format(config["DATASET"]["name"])
 
-    register_coco_instances(
-        train_data_name,
-        {},
-        config["DATASET"]["annotations_path"],
-        config["DATASET"]["images_path"])
+    if train_data_name not in DatasetCatalog.list():
+        register_coco_instances(
+            train_data_name,
+            {},
+            config["DATASET"]["annotations_path"],
+            config["DATASET"]["images_path"])
     dataset_dicts = DatasetCatalog.get(
         "{}_train".format(config["DATASET"]["name"]))
     metadata_ = MetadataCatalog.get(
@@ -82,4 +83,4 @@ def train_detection(config_path):
     trainer.train()
 
 
-train_detection(config_path=str(args.file))
+# train_detection(config_path=str(args.file))

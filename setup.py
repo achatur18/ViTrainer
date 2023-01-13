@@ -12,6 +12,9 @@ setup(
     install_requires=[
         'numpy',
         "torch",
-        "colorama"
+        "colorama",
+        "fastapi",
+        "uvicorn",
+        "python-multipart"
     ],
 )
