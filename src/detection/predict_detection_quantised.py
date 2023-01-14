@@ -1,3 +1,5 @@
+
+
 import argparse
 import distutils.core
 import json
@@ -16,11 +18,14 @@ from detectron2 import model_zoo
 from detectron2.config import get_cfg
 from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.data.datasets import register_coco_instances
-from detectron2.engine import DefaultPredictor, DefaultTrainer
 from detectron2.utils.logger import setup_logger
 from detectron2.utils.visualizer import ColorMode, Visualizer
+
+from detectron2.modeling import build_model
+from detectron2.checkpoint import DetectionCheckpointer
+
+import detectron2.data.transforms as T
 import time
-setup_logger()
 
 def model_size(model):
     param_size = 0
@@ -32,7 +37,15 @@ def model_size(model):
 
     size_all_mb = (param_size + buffer_size) / 1024**2
     return size_all_mb
-    
+
+def quantize_model(model):
+    # Convert the model to quantized version
+    quantized_model = torch.quantization.convert(torch.quantization.prepare(model))
+    torch.save(quantized_model,"output/quantised_model_final.pth")
+
+    return quantized_model
+setup_logger()
+
 TORCH_VERSION = ".".join(torch.__version__.split(".")[:2])
 CUDA_VERSION = torch.__version__.split("+")[-1]
 print("torch: ", TORCH_VERSION, "; cuda: ", CUDA_VERSION)
@@ -52,6 +65,48 @@ parser.add_argument("--image_path", type=str, help="path to the image file")
 
 # Parse the command-line arguments
 args = parser.parse_args()
+
+
+class DefaultPredictor_:
+    def __init__(self, cfg):
+        self.cfg = cfg.clone()  # cfg can be modified by model
+        self.model = build_model(self.cfg)
+        self.model.eval()
+        self.model = quantize_model(self.model)
+        if len(cfg.DATASETS.TEST):
+            self.metadata = MetadataCatalog.get(cfg.DATASETS.TEST[0])
+
+        checkpointer = DetectionCheckpointer(self.model)
+        checkpointer.load(cfg.MODEL.WEIGHTS)
+
+        self.aug = T.ResizeShortestEdge(
+            [cfg.INPUT.MIN_SIZE_TEST, cfg.INPUT.MIN_SIZE_TEST], cfg.INPUT.MAX_SIZE_TEST
+        )
+
+        self.input_format = cfg.INPUT.FORMAT
+        assert self.input_format in ["RGB", "BGR"], self.input_format
+
+    def __call__(self, original_image):
+        """
+        Args:
+            original_image (np.ndarray): an image of shape (H, W, C) (in BGR order).
+        Returns:
+            predictions (dict):
+                the output of the model for one image only.
+                See :doc:`/tutorials/models` for details about the format.
+        """
+        with torch.no_grad():  # https://github.com/sphinx-doc/sphinx/issues/4258
+            # Apply pre-processing to image.
+            if self.input_format == "RGB":
+                # whether the model expects BGR inputs or RGB
+                original_image = original_image[:, :, ::-1]
+            height, width = original_image.shape[:2]
+            image = self.aug.get_transform(original_image).apply_image(original_image)
+            image = torch.as_tensor(image.astype("float32").transpose(2, 0, 1))
+
+            inputs = {"image": image, "height": height, "width": width}
+            predictions = self.model([inputs])[0]
+            return predictions
 
 
 def predict(image_path, predictor, metadata_):
@@ -84,7 +139,7 @@ def predict(image_path, predictor, metadata_):
     out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     out = out.get_image()[:, :, ::-1]
     cv2.imwrite("output/result.jpg", out)
-    return {"boxes": boxes, "classes": classes, "scores": scores, "prediction-time":time.time()-start_time}
+    return {"image_path":image_path, "boxes": boxes, "classes": classes, "scores": scores, "prediction-time":time.time()-start_time}
 
 
 def predict_detection(config_path, image_path):
@@ -109,7 +164,7 @@ def predict_detection(config_path, image_path):
     cfg.SOLVER.BASE_LR = config["BASE_LR"]
     cfg.SOLVER.MAX_ITER = config["EPOCH"]
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-    predictor = DefaultPredictor(cfg)
+    predictor = DefaultPredictor_(cfg)
 
     image_pred = predict(image_path, predictor, metadata_)
 
@@ -146,7 +201,7 @@ def predict_detection_batch(config_path):
     cfg.SOLVER.BASE_LR = config["BASE_LR"]
     cfg.SOLVER.MAX_ITER = config["EPOCH"]
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-    predictor = DefaultPredictor(cfg)
+    predictor = DefaultPredictor_(cfg)
 
     train_data_name = "{}_train".format(config["DATASET"]["name"])
 
@@ -174,9 +229,8 @@ def predict_detection_batch(config_path):
     # Save the JSON string to a file
     with open('output/result.json', 'w') as outfile:
         outfile.write(json_data)
-    return {"total-time": sum(total_time), "model-size": sys.getsizeof(torch.load(cfg.MODEL.WEIGHTS))}
+    return {"total-time": sum(total_time), "model-size": sys.getsizeof(torch.load("output/quantised_model_final.pth"))}
     # cv2.imwrite("output/output_pred.jpg", image_pred)
-
 
 print(isinstance(args.image_path, type(None)))
 if not isinstance(args.image_path, type(None)):
