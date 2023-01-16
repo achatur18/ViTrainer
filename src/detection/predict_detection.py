@@ -62,7 +62,7 @@ def predict(image_path, predictor, metadata_, MASK_ON=False):
     # print(outputs)
     seg_masks=None
     if MASK_ON:
-        seg_masks = outputs["instances"].pred_masks
+        seg_masks = outputs["instances"].pred_masks.tolist()
 
     scores = []
     for score in outputs["instances"].scores:
