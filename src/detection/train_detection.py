@@ -40,6 +40,26 @@ parser.add_argument("--file", type=str, help="path to the input file")
 
 # Parse the command-line arguments
 args = parser.parse_args()
+from detectron2.engine import HookBase
+
+class EarlyStoppingHook(HookBase):
+    def __init__(self, max_iter, threshold):
+        self.max_iter = max_iter
+        self.threshold = threshold
+        self.best_loss = float("inf")
+        self.no_improvement = 0
+
+    def after_step(self):
+        current_loss = self.trainer.iter_info.loss.cpu()
+        if current_loss < self.best_loss:
+            self.best_loss = current_loss
+            self.no_improvement = 0
+        else:
+            self.no_improvement += 1
+            if self.no_improvement >= self.max_iter:
+                print("Validation loss has not improved for {} iterations. Stopping training.".format(self.max_iter))
+                self.trainer.stop = True
+
 
 
 def train_detection(config_path):
@@ -76,6 +96,8 @@ def train_detection(config_path):
     cfg.SOLVER.BASE_LR = config["BASE_LR"]
     cfg.SOLVER.MAX_ITER = config["EPOCH"]
     trainer = DefaultTrainer(cfg)
+
+    trainer.register_hooks([EarlyStoppingHook(max_iter=cfg.SOLVER.MAX_ITER, threshold=0.01)])
     trainer.resume_or_load(resume=config["RESUME"])
     trainer.train()
 
