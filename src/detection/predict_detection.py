@@ -164,7 +164,7 @@ def predict_detection_batch(config_path):
     image_preds=[]
     for d in dataset_dicts[:10]:
         image_path = d["file_name"]
-        image_pred = predict(image_path, predictor, metadata_)
+        image_pred = predict(image_path, predictor, metadata_, cfg.MODEL.MASK_ON)
         image_preds.append(image_pred)
 
     total_time = [float(d["prediction-time"]) for d in image_preds]
