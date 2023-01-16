@@ -54,8 +54,8 @@ parser.add_argument("--image_path", type=str, help="path to the image file")
 args = parser.parse_args()
 
 
-def predict(im, predictor, metadata_, MASK_ON=False):
-    # im = cv2.imread(image_path)
+def predict(image_path, predictor, metadata_, MASK_ON=False):
+    im = cv2.imread(image_path)
     # format is documented at
     # https://detectron2.readthedocs.io/tutorials/models.html#model-output-format
     outputs = predictor(im)
