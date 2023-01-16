@@ -44,7 +44,7 @@ args = parser.parse_args()
 
 
 
-def predict(im, predictor, metadata_, MASK_ON):
+def predict(im, predictor, metadata_, MASK_ON=False):
     # im = cv2.imread(image_path)
     # format is documented at
     # https://detectron2.readthedocs.io/tutorials/models.html#model-output-format
@@ -104,7 +104,7 @@ def predict_detection(config_path, image_path):
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     predictor = DefaultPredictor(cfg)
 
-    image_pred = predict(image_path, predictor, metadata_)
+    image_pred = predict(image_path, predictor, metadata_, cfg.MODEL.MASK_ON)
 
     # Convert the dictionary to a JSON string
     json_data = json.dumps(image_pred)
