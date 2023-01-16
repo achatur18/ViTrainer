@@ -109,13 +109,16 @@ class DefaultPredictor_:
             return predictions
 
 
-def predict(image_path, predictor, metadata_):
+def predict(image_path, predictor, metadata_, MASK_ON=False):
     im = cv2.imread(image_path)
     # format is documented at
     # https://detectron2.readthedocs.io/tutorials/models.html#model-output-format
     start_time=time.time()
     outputs = predictor(im)
     # print(outputs)
+    seg_masks=None
+    if MASK_ON:
+        seg_masks = outputs["instances"].pred_masks.tolist()
 
     scores = []
     for score in outputs["instances"].scores:
@@ -139,7 +142,7 @@ def predict(image_path, predictor, metadata_):
     out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     out = out.get_image()[:, :, ::-1]
     cv2.imwrite("output/result.jpg", out)
-    return {"image_path":image_path, "boxes": boxes, "classes": classes, "scores": scores, "prediction-time":time.time()-start_time}
+    return {"image_path":image_path, "boxes": boxes, "classes": classes, "scores": scores, "prediction-time":time.time()-start_time, "seg_masks": seg_masks}
 
 
 def predict_detection(config_path, image_path):
@@ -166,7 +169,7 @@ def predict_detection(config_path, image_path):
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     predictor = DefaultPredictor_(cfg)
 
-    image_pred = predict(image_path, predictor, metadata_)
+    image_pred = predict(image_path, predictor, metadata_, cfg.MODEL.MASK_ON)
 
     # Convert the dictionary to a JSON string
     json_data = json.dumps(image_pred)

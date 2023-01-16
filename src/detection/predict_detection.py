@@ -58,6 +58,7 @@ def predict(image_path, predictor, metadata_, MASK_ON=False):
     im = cv2.imread(image_path)
     # format is documented at
     # https://detectron2.readthedocs.io/tutorials/models.html#model-output-format
+    start_time=time.time()
     outputs = predictor(im)
     # print(outputs)
     seg_masks=None
@@ -86,7 +87,7 @@ def predict(image_path, predictor, metadata_, MASK_ON=False):
     out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     out = out.get_image()[:, :, ::-1]
     cv2.imwrite("output/result.jpg", out)
-    return {"boxes": boxes, "classes": classes, "scores": scores, "seg_masks": seg_masks}
+    return {"boxes": boxes, "classes": classes, "scores": scores, "seg_masks": seg_masks, "prediction-time":time.time()-start_time}
 
 
 def predict_detection(config_path, image_path):
