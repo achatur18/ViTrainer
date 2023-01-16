@@ -46,12 +46,15 @@ def get_config(config_path):
 # args = parser.parse_args()
 
 
-def predict(im, predictor, metadata_):
+def predict(im, predictor, metadata_, MASK_ON):
     # im = cv2.imread(image_path)
     # format is documented at
     # https://detectron2.readthedocs.io/tutorials/models.html#model-output-format
     outputs = predictor(im)
     # print(outputs)
+    seg_masks=None
+    if MASK_ON:
+        seg_masks = outputs["instances"].pred_masks
 
     scores = []
     for score in outputs["instances"].scores:
@@ -75,7 +78,7 @@ def predict(im, predictor, metadata_):
     out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     out = out.get_image()[:, :, ::-1]
     cv2.imwrite("output/result.jpg", out)
-    return {"boxes": boxes, "classes": classes, "scores": scores}
+    return {"boxes": boxes, "classes": classes, "scores": scores, "seg_masks": seg_masks}
 
 
 def predict_detection(config, image):
@@ -102,7 +105,7 @@ def predict_detection(config, image):
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     predictor = DefaultPredictor(cfg)
 
-    image_pred = predict(image, predictor, metadata_)
+    image_pred = predict(image, predictor, metadata_, cfg.MODEL.MASK_ON)
     return image_pred
     # cv2.imwrite("output/output_pred.jpg", image_pred)
 
